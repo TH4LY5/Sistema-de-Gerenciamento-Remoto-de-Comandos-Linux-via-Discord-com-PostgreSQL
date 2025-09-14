@@ -21,8 +21,6 @@ if not DATABASE:
 DATABASE = DATABASE.replace("postgres://", "postgresql://")
 
 engine = create_engine(DATABASE)
-
-engine = create_engine(DATABASE)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -202,3 +200,7 @@ def post_command_result(command_id: int, result: CommandResult):
         return {"message": "Resultado registrado"}
     finally:
         db.close()
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="127.0.0.1", port=port)
