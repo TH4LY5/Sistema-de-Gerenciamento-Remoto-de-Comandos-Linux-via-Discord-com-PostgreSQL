@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SERVER_URL = "https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/"
+SERVER_URL = "https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com"
 AUTHORIZED_USERS = [410731828618592256]
 
 intents = discord.Intents.default()
