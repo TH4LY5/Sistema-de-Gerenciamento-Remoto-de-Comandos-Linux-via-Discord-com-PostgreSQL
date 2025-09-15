@@ -1,6 +1,5 @@
 import os
 import time
-import uuid
 import requests
 import subprocess
 import socket
@@ -23,35 +22,44 @@ def get_machine_id():
         with open(MACHINE_FILE, "r") as f:
             return f.read().strip()
     else:
-        machine_id = str(uuid.uuid4())
-        with open(MACHINE_FILE, "w") as f:
-            f.write(machine_id)
-        log_message(f"Novo ID de máquina gerado: {machine_id}")
-        return machine_id
+        return None
 
 
-MACHINE_ID = get_machine_id()
 MACHINE_NAME = socket.gethostname()
+MACHINE_ID = get_machine_id()
 
 
 # Registrar ou atualizar a máquina no servidor
 def register_machine():
+    global MACHINE_ID
     try:
-        log_message(f"Tentando registrar máquina no servidor: {MACHINE_NAME} ({MACHINE_ID})")
+        log_message(f"Tentando registrar/atualizar máquina no servidor: {MACHINE_NAME}")
         resp = requests.post(f"{SERVER_URL}/register_machine", json={
-            "id": MACHINE_ID,
             "name": MACHINE_NAME
         })
         resp.raise_for_status()
-        log_message(f"Máquina registrada com sucesso: {MACHINE_NAME} ({MACHINE_ID})")
+        data = resp.json()
+        machine_id_from_server = data.get("machine_id")
+        if machine_id_from_server:
+            MACHINE_ID = machine_id_from_server
+            # Salva o ID no arquivo
+            with open(MACHINE_FILE, "w") as f:
+                f.write(MACHINE_ID)
+            log_message(f"Máquina registrada/atualizada com sucesso: {MACHINE_NAME} (ID: {MACHINE_ID})")
+        else:
+            log_message("Erro: servidor não retornou machine_id")
     except Exception as e:
-        log_message(f"Falha ao registrar máquina: {e}")
+        log_message(f"Falha ao registrar/atualizar máquina: {e}")
 
 
 # Buscar comandos pendentes
 def check_commands():
+    if MACHINE_ID is None:
+        log_message("Não é possível verificar comandos: MACHINE_ID não está definido")
+        return
+
     try:
-        log_message("Enviando ping para o servidor - verificando comandos pendentes")
+        log_message("Verificando comandos pendentes")
         resp = requests.get(f"{SERVER_URL}/commands/{MACHINE_ID}")
         resp.raise_for_status()
         data = resp.json()
@@ -105,10 +113,16 @@ def send_result(cmd_id, output):
 # Loop principal
 def main():
     log_message("Iniciando agente...")
-    register_machine()
+
+    # Se não temos MACHINE_ID, registra a máquina
+    if MACHINE_ID is None:
+        register_machine()
 
     while True:
-        log_message("Iniciando ciclo de verificação de comandos")
+        log_message("Iniciando ciclo de verificação")
+        # Atualiza o last_seen no servidor
+        register_machine()
+        # Verifica por comandos pendentes
         check_commands()
         log_message("Ciclo concluído - Aguardando 5 minutos")
         time.sleep(300)  # 5 minutos

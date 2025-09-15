@@ -76,14 +76,14 @@ async def on_message(message):
         try:
             data = await make_get_request("machines")
             machines = [m for m in data['machines'] if
-                        datetime.fromisoformat(m['last_ping']) > datetime.now() - timedelta(minutes=5)]
+                        datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
 
             if not machines:
                 await message.channel.send("Nenhuma máquina ativa nos últimos 5 minutos.")
                 return
 
             response = "🖥️ **Máquinas Ativas:**\n" + "\n".join(
-                f"{m['name']} (Último ping: {m['last_ping']})" for m in machines
+                f"{m['name']} (Último ping: {m['last_seen']})" for m in machines
             )
             await message.channel.send(response)
         except Exception as e:
