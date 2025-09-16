@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SERVER_URL = db_url = os.getenv("SERVER_URL")
-AUTHORIZED_USERS = [410731828618592256,694217161752969327]
+AUTHORIZED_USERS = [410731828618592256,694217161752969327,703340009259925624]
 
 intents = discord.Intents.default()
 intents.message_content = True
