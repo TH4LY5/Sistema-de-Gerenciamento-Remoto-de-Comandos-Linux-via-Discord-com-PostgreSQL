@@ -16,7 +16,7 @@ DATABASE = os.getenv("DATABASE_URL")
 if not DATABASE:
     raise ValueError("DATABASE_URL não está definida nas variáveis de ambiente")
 
-# Replace 'postgres://' with 'postgresql://' for SQLAlchemy compatibility
+
 DATABASE = DATABASE.replace("postgres://", "postgresql://")
 
 engine = create_engine(DATABASE)
@@ -120,7 +120,6 @@ def register_machine(machine: MachineRegistration):
 
 @app.post("/scripts")
 def register_script(script: ScriptRegistration):
-    # A validação agora é uma única chamada de método, limpa e declarativa.
     if CommandSecurity.is_dangerous(script.content):
         raise HTTPException(
             status_code=400,  # Bad Request
