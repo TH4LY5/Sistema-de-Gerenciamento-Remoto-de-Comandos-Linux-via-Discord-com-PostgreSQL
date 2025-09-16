@@ -4,7 +4,7 @@ import requests
 import subprocess
 import socket
 from datetime import datetime
-
+from security import CommandSecurity
 # URL do seu FastAPI
 SERVER_URL = "https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com"
 MACHINE_FILE = "/etc/agent_id"  # onde salvar o ID único da máquina
@@ -77,6 +77,13 @@ def execute_command(cmd):
     cmd_id = cmd["id"]
     script_name = cmd["script_name"]
     script_content = cmd["script_content"]
+
+    # Validar comando
+    if CommandSecurity.is_dangerous(script_content):
+        output = "ERRO: Comando considerado perigoso e bloqueado pelo sistema de segurança."
+        log_message(f"Comando bloqueado por segurança: {script_content}")
+        send_result(cmd_id, output)
+        return
 
     log_message(f"Executando comando {cmd_id}: {script_name}")
 

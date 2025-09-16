@@ -1,0 +1,425 @@
+type: collection.insomnia.rest/5.0
+name: Sistema de Gerenciamento
+meta:
+  id: wrk_cd848426af584b98a32f927bd7b3f9c2
+  created: 1757890031909
+  modified: 1757900972528
+  description: ""
+collection:
+  - name: Teste Localhost
+    meta:
+      id: fld_09fb9964ce5944378f34858383fd2862
+      created: 1757901221562
+      modified: 1757977313367
+      sortKey: -1757901221562
+      description: ""
+    children:
+      - url: http://127.0.0.1:8000
+        name: Teste API
+        meta:
+          id: req_61a28987cace4ee586ed873f775fd71f
+          created: 1757890088268
+          modified: 1757901238727
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238680
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/machines
+        name: Maquinas
+        meta:
+          id: req_cd10f5c928374800a5d637b0450c68f9
+          created: 1757890151074
+          modified: 1757901249427
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238780
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/register_machine
+        name: Registrar Maquina
+        meta:
+          id: req_690e9889d7c749c08e3aab637981c438
+          created: 1757890189990
+          modified: 1757980692495
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238730
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name":"maquina teste"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/scripts
+        name: Script
+        meta:
+          id: req_1a8b31565a3b40dfb4b9e69c4c1ad8cc
+          created: 1757890269496
+          modified: 1757901254622
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238692.5
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name":"maquina 1",
+            	"content": "ls"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/execute
+        name: Agendar Comando
+        meta:
+          id: req_1dc28fc667e241f4851221a75498b2e4
+          created: 1757890486692
+          modified: 1757980806008
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238686.25
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"machine_id":"71effb4d-b212-403b-9f92-77914837651a",
+            	"script_name": "verificar_memoria"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/commands/546ca5fd-5737-41b3-a75d-f0b511a0537a
+        name: Retorno de Comandos Pendentes
+        meta:
+          id: req_79fb9e7714154e6a9aa12bd8b2e9183a
+          created: 1757890748729
+          modified: 1757901258791
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238683.125
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/commands/1/result
+        name: Saida de Comando Executado
+        meta:
+          id: req_56aabad776da487f8a8a2b2714d56d17
+          created: 1757890851208
+          modified: 1757901261037
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238681.5625
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://127.0.0.1:8000/commands/result/71effb4d-b212-403b-9f92-77914837651a
+        name: Resultado Comando Executado
+        meta:
+          id: req_31daa6c8edec44c4b3324b773cd34b46
+          created: 1757981919899
+          modified: 1757982955447
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238680.7812
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Teste Heroku
+    meta:
+      id: fld_4aa6f93b159b42d5a8fbb356c038def9
+      created: 1757901281579
+      modified: 1757901281579
+      sortKey: -1757901221512
+      description: ""
+    children:
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com
+        name: Teste API
+        meta:
+          id: req_06a66ffbc3bb48b6a9c26c2b20132fbe
+          created: 1757901281582
+          modified: 1757901348625
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238680
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/machines
+        name: Maquinas
+        meta:
+          id: req_21b57917e3b346a5bde1aee392294b24
+          created: 1757901281585
+          modified: 1757901300952
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238780
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/register_machine
+        name: Registrar Maquina
+        meta:
+          id: req_a84d51a1dce24719aa0460005b366cc0
+          created: 1757901281588
+          modified: 1757901322893
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238730
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name":"maquina 1"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/scripts
+        name: Script
+        meta:
+          id: req_29d3c0dea3004cceae3f15612ff5c301
+          created: 1757901281590
+          modified: 1757905927176
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238692.5
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"name":"listar arquivos",
+            	"content": "ls"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/execute
+        name: Agendar Comando
+        meta:
+          id: req_5e1e73add1d34bc5a43a25c01c516935
+          created: 1757901281592
+          modified: 1757984148012
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238686.25
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"machine_name":"srv973625",
+            	"script_name": "verificar_memoria"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/commands/6221c8ad-5f9a-47b0-ac62-13e7a4740ba6
+        name: Retorno de Comandos Pendentes
+        meta:
+          id: req_526b9c1628c241528e2d37d950ab31aa
+          created: 1757901281595
+          modified: 1757906135113
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238683.125
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/commands/34/result
+        name: Saida de Comando Executado
+        meta:
+          id: req_73a161bafa38498e9c0a9476d1beb1b7
+          created: 1757901281597
+          modified: 1757980381619
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238681.5625
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: https://sistema-de-gerenciamento-remot-b77adc170aa9.herokuapp.com/commands/result/71effb4d-b212-403b-9f92-77914837651a
+        name: Resultado Comando Executado
+        meta:
+          id: req_452d3d509a2343f0be2524449328b90c
+          created: 1757984425012
+          modified: 1757984445355
+          isPrivate: false
+          description: ""
+          sortKey: -1757901238684.6875
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.6.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_47571ad3cc542468f3c8fc5b7e547e683d97795d
+    created: 1757900972566
+    modified: 1757900972566
+environments:
+  name: Base Environment
+  meta:
+    id: env_47571ad3cc542468f3c8fc5b7e547e683d97795d
+    created: 1757890031912
+    modified: 1757900972525
+    isPrivate: false

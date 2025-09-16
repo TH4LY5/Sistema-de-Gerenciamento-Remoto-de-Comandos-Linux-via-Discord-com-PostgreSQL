@@ -1,4 +1,3 @@
-# server.py
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -8,7 +7,7 @@ from sqlalchemy import create_engine, Column, String, Integer, Text, DateTime, F
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import uuid
-
+from security import CommandSecurity
 # Carregar variáveis de ambiente
 load_dotenv()
 
@@ -121,22 +120,27 @@ def register_machine(machine: MachineRegistration):
 
 @app.post("/scripts")
 def register_script(script: ScriptRegistration):
+    # A validação agora é uma única chamada de método, limpa e declarativa.
+    if CommandSecurity.is_dangerous(script.content):
+        raise HTTPException(
+            status_code=400,  # Bad Request
+            detail="O script contém comandos ou padrões considerados perigosos e não pode ser registrado."
+        )
+
     db = SessionLocal()
     try:
-        # Verifica se script já existe
         existing_script = db.query(Script).filter(Script.name == script.name).first()
 
         if existing_script:
-            # Atualiza o conteúdo
+            # A mesma validação se aplica a atualizações
             existing_script.content = script.content
             db.commit()
-            return {"message": "Script atualizado"}
+            return {"message": "Script atualizado com sucesso."}
         else:
-            # Cria novo script
             new_script = Script(name=script.name, content=script.content)
             db.add(new_script)
             db.commit()
-            return {"message": "Script registrado"}
+            return {"message": "Script registrado com sucesso."}
     finally:
         db.close()
 
@@ -237,4 +241,4 @@ def get_last_command_result(machine_id: str):
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="127.0.0.1", port=port)
