@@ -64,7 +64,6 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    # (O resto do seu código de comandos continua o mesmo, sem alterações)
     if message.author == client.user:
         return
 
@@ -72,7 +71,44 @@ async def on_message(message):
         await message.channel.send("❌ Você não tem permissão para executar comandos.")
         return
 
-    if message.content.lower().startswith("!list_machines"):
+    # Comando de Ajuda
+    if message.content.lower() == "!help":
+        embed = discord.Embed(
+            title="📜 Ajuda de Comandos",
+            description="Aqui estão todos os comandos disponíveis e como usá-los.",
+            color=discord.Color.blue()
+        )
+
+        embed.add_field(
+            name="`!list_machines`",
+            value="Lista todas as máquinas que estão ativas e se comunicaram com o servidor nos últimos 5 minutos.",
+            inline=False
+        )
+
+        embed.add_field(
+            name="`!register_script <nome> <conteúdo>`",
+            value="Registra um novo script no sistema para execução posterior. O nome não pode ter espaços.\n**Exemplo:** `!register_script checar_ip ipconfig`",
+            inline=False
+        )
+
+        embed.add_field(
+            name="`!execute_script <nome_máquina> <nome_script>`",
+            value="Envia um comando para que uma máquina específica execute um script já registrado.\n**Exemplo:** `!execute_script PC-DA-SALA checar_ip`",
+            inline=False
+        )
+
+        embed.add_field(
+            name="`!command_result <nome_máquina>`",
+            value="Mostra o resultado (status e output) do último comando executado na máquina especificada.\n**Exemplo:** `!command_result PC-DA-SALA`",
+            inline=False
+        )
+
+        embed.set_footer(text="Bot de Gerenciamento Remoto de Maquina Linux by TH4LY5")
+
+        await message.channel.send(embed=embed)
+
+    # Demais comandos
+    elif message.content.lower().startswith("!list_machines"):
         try:
             data = await make_get_request("machines")
             machines = [m for m in data['machines'] if
@@ -114,36 +150,31 @@ async def on_message(message):
             await message.channel.send(f"Erro ao executar script: {str(e)}")
 
     elif message.content.lower().startswith("!command_result"):
-
         parts = message.content.split()
         if len(parts) < 2:
             await message.channel.send("Uso: !command_result <nome_da_maquina>")
             return
         machine_name = parts[1]
         try:
-            # Primeiro, obter a lista de máquinas ativas
             data = await make_get_request("machines")
             machines = [m for m in data['machines'] if
                         datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
 
-            # Procurar a máquina pelo nome
             machine = next((m for m in machines if m['name'] == machine_name), None)
             if not machine:
                 await message.channel.send(f"Máquina '{machine_name}' não encontrada ou inativa.")
                 return
 
             machine_id = machine['id']
-
-            # Agora, com o ID, buscar o último resultado
             data = await make_get_request(f"commands/result/{machine_id}")
-            if data.get('command') is None:
+            if not data or data.get('command_id') is None:
                 await message.channel.send(f"Nenhum comando completado encontrado para a máquina '{machine_name}'.")
                 return
 
             response = (
-                f"📊 **Último Resultado para {machine_name}**\n"        
-                f"📜 Script: {data['script_name']}\n"        
-                f"⚙️ Status: {data['status']}\n"        
+                f"📊 **Último Resultado para {machine_name}**\n"
+                f"📜 Script: {data['script_name']}\n"
+                f"⚙️ Status: {data['status']}\n"
                 f"📝 Output:\n```\n{data['output'] or 'Sem saída'}\n```"
             )
             await message.channel.send(response)
