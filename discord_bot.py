@@ -113,6 +113,43 @@ async def on_message(message):
         except Exception as e:
             await message.channel.send(f"Erro ao executar script: {str(e)}")
 
+    elif message.content.lower().startswith("!command_result"):
+
+        parts = message.content.split()
+        if len(parts) < 2:
+            await message.channel.send("Uso: !command_result <nome_da_maquina>")
+            return
+        machine_name = parts[1]
+        try:
+            # Primeiro, obter a lista de máquinas ativas
+            data = await make_get_request("machines")
+            machines = [m for m in data['machines'] if
+                        datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
+
+            # Procurar a máquina pelo nome
+            machine = next((m for m in machines if m['name'] == machine_name), None)
+            if not machine:
+                await message.channel.send(f"Máquina '{machine_name}' não encontrada ou inativa.")
+                return
+
+            machine_id = machine['id']
+
+            # Agora, com o ID, buscar o último resultado
+            data = await make_get_request(f"commands/result/{machine_id}")
+            if data.get('command') is None:
+                await message.channel.send(f"Nenhum comando completado encontrado para a máquina '{machine_name}'.")
+                return
+
+            response = (
+                f"📊 **Último Resultado para {machine_name}**\n"        
+                f"📜 Script: {data['script_name']}\n"        
+                f"⚙️ Status: {data['status']}\n"        
+                f"📝 Output:\n```\n{data['output'] or 'Sem saída'}\n```"
+            )
+            await message.channel.send(response)
+        except Exception as e:
+            await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
+
 
 async def main():
     """Função principal que busca o token e inicia o bot."""

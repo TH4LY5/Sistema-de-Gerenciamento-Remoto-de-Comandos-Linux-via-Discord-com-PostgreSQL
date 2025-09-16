@@ -72,6 +72,11 @@ class ExecuteRequest(BaseModel):
 class CommandResult(BaseModel):
     output: str
 
+class CommandResultInput(BaseModel):
+    machine_id: str
+    script_name: str
+    output: str
+
 
 # Endpoints
 @app.get("/")
@@ -141,7 +146,7 @@ def execute_script(request: ExecuteRequest):
     db = SessionLocal()
     try:
         # Encontra a máquina pelo nome
-        machine = db.query(Machine).filter(Machine.name == request.machine_name).first()
+        machine = db.query(Machine).filter(Machine.id == request.machine_id).first()
         if not machine:
             raise HTTPException(status_code=404, detail="Máquina não encontrada")
 
@@ -198,6 +203,35 @@ def post_command_result(command_id: int, result: CommandResult):
         db.commit()
 
         return {"message": "Resultado registrado"}
+    finally:
+        db.close()
+
+@app.get("/commands/result/{machine_id}")
+def get_last_command_result(machine_id: str):
+    db = SessionLocal()
+    try:
+        # Encontra a máquina
+        machine = db.query(Machine).filter(Machine.id == machine_id).first()
+        if not machine:
+            raise HTTPException(status_code=404, detail="Máquina não encontrada")
+
+        # Pega o último comando completado da máquina
+        command = (
+            db.query(Command)
+            .filter(Command.machine_id == machine.id, Command.status == "completed")
+            .order_by(Command.id.desc())
+            .first()
+        )
+
+        if not command:
+            return {"message": "Nenhum comando completado encontrado", "command": None}
+
+        return {
+            "command_id": command.id,
+            "script_name": command.script_name,
+            "output": command.output,
+            "status": command.status
+        }
     finally:
         db.close()
 if __name__ == "__main__":
