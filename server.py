@@ -146,7 +146,7 @@ def execute_script(request: ExecuteRequest):
     db = SessionLocal()
     try:
         # Encontra a máquina pelo nome
-        machine = db.query(Machine).filter(Machine.id == request.machine_id).first()
+        machine = db.query(Machine).filter(Machine.name == request.machine_name).first()
         if not machine:
             raise HTTPException(status_code=404, detail="Máquina não encontrada")
 
