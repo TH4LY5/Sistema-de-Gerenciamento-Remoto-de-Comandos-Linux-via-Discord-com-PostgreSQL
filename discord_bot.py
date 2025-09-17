@@ -199,7 +199,7 @@ async def on_message(message):
             
             await message.channel.send(response)
         except Exception as e:
-        await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
+            await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
         parts = message.content.split()
         if len(parts) < 2:
             await message.channel.send("Uso: !command_result <nome_da_maquina>")
