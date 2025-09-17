@@ -187,13 +187,13 @@ async def on_message(message):
                 f"Falha ao agendar script '{script_name}' para {machine_name}: {e}")
 
     elif message.content.lower().startswith("!command_result"):
-
         parts = message.content.split()
         if len(parts) < 2:
             await message.channel.send("Uso: !command_result <nome_da_maquina>")
             return
 
-        machine_name = parts[1]
+        machine_name = parts[1]        
+        logging.info(f"Comando '!command_result' recebido de '{message.author}' para a máquina '{machine_name}'.")
 
         try:
             data = await make_get_request("machines")
@@ -203,24 +203,25 @@ async def on_message(message):
                 (m for m in machines if m['name'] == machine_name), None)
 
             if not machine:
+                logging.warning(f"Máquina '{machine_name}' não foi encontrada ou está inativa. Solicitado por '{message.author}'.")
                 await message.channel.send(f"Máquina '{machine_name}' não encontrada ou inativa.")
                 return
 
             machine_id = machine['id']
+            logging.info(f"Máquina '{machine_name}' encontrada com ID: {machine_id}.")
 
             data = await make_get_request(f"commands/result/{machine_id}")
 
             if not data or data.get('command_id') is None:
+                logging.warning(f"Nenhum resultado de comando encontrado para a máquina '{machine_name}' (ID: {machine_id}). Solicitado por '{message.author}'.")
                 await message.channel.send(f"Nenhum comando completado encontrado para a máquina '{machine_name}'.")
                 return
 
             output = data['output'] or 'Sem saída'
-
-            # Calcula o espaço disponível para o output
+            
             base_text_length = len(f"📊 **Último Resultado para {machine_name}**\n📜 Script: {data['script_name']}\n⚙️ Status: {data['status']}\n📝 Output:\n```\n\n```")
             max_output_length = 2000 - base_text_length
 
-            # Trunca o output se for muito longo
             if len(output) > max_output_length:
                 output = output[:max_output_length - 3] + "..."
 
@@ -232,9 +233,13 @@ async def on_message(message):
             )
             
             await message.channel.send(response)
+            # Log de SUCESSO: A operação foi concluída com êxito.
+            logging.info(f"Resultado para a máquina '{machine_name}' enviado com sucesso para o canal '{message.channel}'.")
 
         except Exception as e:
-            await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
+            # Log de ERRO: Algo inesperado aconteceu. 'exception' inclui o traceback completo do erro.
+            logging.exception(f"Ocorreu um erro inesperado ao processar !command_result para '{machine_name}' solicitado por '{message.author}':")
+        await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
             
 # Inicialização do BOT
 async def main():
