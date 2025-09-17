@@ -28,6 +28,8 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 # Funções auxiliares
+
+
 async def get_discord_token_from_db():
     """Conecta ao banco e busca o token do Discord."""
     try:
@@ -50,7 +52,8 @@ async def get_discord_token_from_db():
             return None
 
     except Exception as e:
-        logger.error(f"Erro ao conectar ou buscar token no banco de dados: {e}")
+        logger.error(
+            f"Erro ao conectar ou buscar token no banco de dados: {e}")
         return None
 
 
@@ -79,10 +82,12 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    logger.info(f"Mensagem recebida de {message.author} ({message.author.id}): {message.content}")
+    logger.info(
+        f"Mensagem recebida de {message.author} ({message.author.id}): {message.content}")
 
     if message.author.id not in AUTHORIZED_USERS:
-        logger.warning(f"Tentativa de uso não autorizado por {message.author} ({message.author.id})")
+        logger.warning(
+            f"Tentativa de uso não autorizado por {message.author} ({message.author.id})")
         await message.channel.send("❌ Você não tem permissão para executar comandos.")
         return
 
@@ -136,7 +141,8 @@ async def on_message(message):
             await message.channel.send(f"Erro ao listar máquinas: {str(e)}")
 
     elif message.content.lower().startswith("!register_script"):
-        logger.info(f"Comando !register_script solicitado por {message.author}")
+        logger.info(
+            f"Comando !register_script solicitado por {message.author}")
         parts = message.content.split(maxsplit=2)
         if len(parts) < 3:
             await message.channel.send("Uso: !register_script <nome> <conteúdo>")
@@ -144,7 +150,8 @@ async def on_message(message):
 
         name, content = parts[1], parts[2]
         if CommandSecurity.is_dangerous(content):
-            logger.warning(f"Tentativa de registrar script perigoso por {message.author}: {content}")
+            logger.warning(
+                f"Tentativa de registrar script perigoso por {message.author}: {content}")
             await message.channel.send(f"❌ Script '{name}' contém comandos perigosos e não pode ser registrado!")
             return
 
@@ -155,46 +162,52 @@ async def on_message(message):
             logger.error(f"Erro ao registrar script '{name}': {e}")
             await message.channel.send(f"Erro ao registrar script: {str(e)}")
 
-
     elif message.content.lower().startswith("!execute_script"):
-       
+
         parts = message.content.split()
-        
+
         if len(parts) < 3:
             await message.channel.send("Uso: !execute_script <nome_máquina> <nome_script>")
-            logging.warning(f"Comando !execute_script usado incorretamente por {message.author}")
+            logging.warning(
+                f"Comando !execute_script usado incorretamente por {message.author}")
             return
         machine_name, script_name = parts[1], parts[2]
 
         try:
-            logging.info(f"Agendando script '{script_name}' para execução na máquina '{machine_name}' solicitado por {message.author}")
+            logging.info(
+                f"Agendando script '{script_name}' para execução na máquina '{machine_name}' solicitado por {message.author}")
             await make_post_request("execute", {"machine_name": machine_name, "script_name": script_name})
             await message.channel.send(f"✅ Script '{script_name}' agendado para execução em {machine_name}!")
-            logging.info(f"Script '{script_name}' agendado com sucesso para {machine_name}")
+            logging.info(
+                f"Script '{script_name}' agendado com sucesso para {machine_name}")
 
         except Exception as e:
             await message.channel.send(f"Erro ao executar script: {str(e)}")
-            logging.error(f"Falha ao agendar script '{script_name}' para {machine_name}: {e}")
+            logging.error(
+                f"Falha ao agendar script '{script_name}' para {machine_name}: {e}")
 
     elif message.content.lower().startswith("!command_result"):
-        logger.info(f"Comando !command_result solicitado por {message.author}")
+
         parts = message.content.split()
         if len(parts) < 2:
             await message.channel.send("Uso: !command_result <nome_da_maquina>")
             return
 
         machine_name = parts[1]
+
         try:
             data = await make_get_request("machines")
-            machines = [m for m in data['machines']
-                        if datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
+            machines = [m for m in data['machines'] if
+                        datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
+            machine = next(
+                (m for m in machines if m['name'] == machine_name), None)
 
-            machine = next((m for m in machines if m['name'] == machine_name), None)
             if not machine:
                 await message.channel.send(f"Máquina '{machine_name}' não encontrada ou inativa.")
                 return
 
             machine_id = machine['id']
+
             data = await make_get_request(f"commands/result/{machine_id}")
 
             if not data or data.get('command_id') is None:
@@ -202,19 +215,77 @@ async def on_message(message):
                 return
 
             output = data['output'] or 'Sem saída'
-            max_output_length = 1999 - len(f"📊 Resultado para {machine_name}\n📜 {data['script_name']}\n⚙️ {data['status']}\n📝 Output:\n```\n\n```")
+
+            max_output_length = 1999 - len(
+                f"📊 **Último Resultado para {machine_name}**\n📜 Script: {data['script_name']}\n⚙️ Status: {data['status']}\n📝 Output:\n```\n\n```")
+
             if len(output) > max_output_length:
-                output = output[:max_output_length - 3] + "..."
+                output = output[:max_output_length - 3] + \
+                    "..."  # Adicionar reticências
 
             response = (
                 f"📊 **Último Resultado para {machine_name}**\n"
                 f"📜 Script: {data['script_name']}\n"
                 f"⚙️ Status: {data['status']}\n"
                 f"📝 Output:\n```\n{output}\n```"
+
             )
+
+            # Verificação final para garantir que não excede o limite do discord
+
+            if len(response) > 1999:
+                # Se ainda exceder, cortar mais do output
+
+                excess = len(response) - 1999
+                output = output[:len(output) - excess - 3] + "..."
+                response = (
+                    f"📊 **Último Resultado para {machine_name}**\n"
+                    f"📜 Script: {data['script_name']}\n"
+                    f"⚙️ Status: {data['status']}\n"
+                    f"📝 Output:\n```\n{output}\n```"
+
+                )
             await message.channel.send(response)
+
         except Exception as e:
-            logger.error(f"Erro no !command_result para {machine_name}: {e}")
+            await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
+        parts = message.content.split()
+
+        if len(parts) < 2:
+            await message.channel.send("Uso: !command_result <nome_da_maquina>")
+            return
+
+        machine_name = parts[1]
+        try:
+
+            data = await make_get_request("machines")
+            machines = [m for m in data['machines'] if
+                        datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
+            machine = next(
+                (m for m in machines if m['name'] == machine_name), None)
+
+            if not machine:
+                await message.channel.send(f"Máquina '{machine_name}' não encontrada ou inativa.")
+                return
+
+            machine_id = machine['id']
+
+            data = await make_get_request(f"commands/result/{machine_id}")
+
+            if not data or data.get('command_id') is None:
+                await message.channel.send(f"Nenhum comando completado encontrado para a máquina '{machine_name}'.")
+                return
+
+            response = (
+                f"📊 **Último Resultado para {machine_name}**\n"
+                f"📜 Script: {data['script_name']}\n"
+                f"⚙️ Status: {data['status']}\n"
+                f"📝 Output:\n```\n{data['output'] or 'Sem saída'}\n```"
+            )
+
+            await message.channel.send(response)
+
+        except Exception as e:
             await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
 
 # Inicialização do BOT
