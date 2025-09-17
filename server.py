@@ -126,23 +126,23 @@ def register_script(script: ScriptRegistration):
             status_code=400,
             detail="O script contém comandos ou padrões considerados perigosos e não pode ser registrado."
         )
-    
-    # Opcional: sanitizar o comando antes de salvar
-    sanitized_content = CommandSecurity.sanitize_command(script.content)
-    
+
     db = SessionLocal()
     try:
         existing_script = db.query(Script).filter(Script.name == script.name).first()
 
         if existing_script:
-            existing_script.content = sanitized_content  # Usar conteúdo sanitizado
+            existing_script.content = script.content
             db.commit()
             return {"message": "Script atualizado com sucesso."}
         else:
-            new_script = Script(name=script.name, content=sanitized_content)  # Usar conteúdo sanitizado
+            new_script = Script(name=script.name, content=script.content)
             db.add(new_script)
             db.commit()
             return {"message": "Script registrado com sucesso."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
     finally:
         db.close()
 
