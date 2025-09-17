@@ -120,23 +120,26 @@ def register_machine(machine: MachineRegistration):
 
 @app.post("/scripts")
 def register_script(script: ScriptRegistration):
+    # Verifica se o script é perigoso
     if CommandSecurity.is_dangerous(script.content):
         raise HTTPException(
-            status_code=400,  # Bad Request
+            status_code=400,
             detail="O script contém comandos ou padrões considerados perigosos e não pode ser registrado."
         )
-
+    
+    # Opcional: sanitizar o comando antes de salvar
+    sanitized_content = CommandSecurity.sanitize_command(script.content)
+    
     db = SessionLocal()
     try:
         existing_script = db.query(Script).filter(Script.name == script.name).first()
 
         if existing_script:
-            # A mesma validação se aplica a atualizações
-            existing_script.content = script.content
+            existing_script.content = sanitized_content  # Usar conteúdo sanitizado
             db.commit()
             return {"message": "Script atualizado com sucesso."}
         else:
-            new_script = Script(name=script.name, content=script.content)
+            new_script = Script(name=script.name, content=sanitized_content)  # Usar conteúdo sanitizado
             db.add(new_script)
             db.commit()
             return {"message": "Script registrado com sucesso."}
