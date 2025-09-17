@@ -216,78 +216,26 @@ async def on_message(message):
 
             output = data['output'] or 'Sem saída'
 
-            max_output_length = 1999 - len(
-                f"📊 **Último Resultado para {machine_name}**\n📜 Script: {data['script_name']}\n⚙️ Status: {data['status']}\n📝 Output:\n```\n\n```")
+            # Calcula o espaço disponível para o output
+            base_text_length = len(f"📊 **Último Resultado para {machine_name}**\n📜 Script: {data['script_name']}\n⚙️ Status: {data['status']}\n📝 Output:\n```\n\n```")
+            max_output_length = 2000 - base_text_length
 
+            # Trunca o output se for muito longo
             if len(output) > max_output_length:
-                output = output[:max_output_length - 3] + \
-                    "..."  # Adicionar reticências
+                output = output[:max_output_length - 3] + "..."
 
             response = (
                 f"📊 **Último Resultado para {machine_name}**\n"
                 f"📜 Script: {data['script_name']}\n"
                 f"⚙️ Status: {data['status']}\n"
                 f"📝 Output:\n```\n{output}\n```"
-
             )
-
-            # Verificação final para garantir que não excede o limite do discord
-
-            if len(response) > 1999:
-                # Se ainda exceder, cortar mais do output
-
-                excess = len(response) - 1999
-                output = output[:len(output) - excess - 3] + "..."
-                response = (
-                    f"📊 **Último Resultado para {machine_name}**\n"
-                    f"📜 Script: {data['script_name']}\n"
-                    f"⚙️ Status: {data['status']}\n"
-                    f"📝 Output:\n```\n{output}\n```"
-
-                )
+            
             await message.channel.send(response)
 
         except Exception as e:
             await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
-        parts = message.content.split()
-
-        if len(parts) < 2:
-            await message.channel.send("Uso: !command_result <nome_da_maquina>")
-            return
-
-        machine_name = parts[1]
-        try:
-
-            data = await make_get_request("machines")
-            machines = [m for m in data['machines'] if
-                        datetime.fromisoformat(m['last_seen']) > datetime.now() - timedelta(minutes=5)]
-            machine = next(
-                (m for m in machines if m['name'] == machine_name), None)
-
-            if not machine:
-                await message.channel.send(f"Máquina '{machine_name}' não encontrada ou inativa.")
-                return
-
-            machine_id = machine['id']
-
-            data = await make_get_request(f"commands/result/{machine_id}")
-
-            if not data or data.get('command_id') is None:
-                await message.channel.send(f"Nenhum comando completado encontrado para a máquina '{machine_name}'.")
-                return
-
-            response = (
-                f"📊 **Último Resultado para {machine_name}**\n"
-                f"📜 Script: {data['script_name']}\n"
-                f"⚙️ Status: {data['status']}\n"
-                f"📝 Output:\n```\n{data['output'] or 'Sem saída'}\n```"
-            )
-
-            await message.channel.send(response)
-
-        except Exception as e:
-            await message.channel.send(f"Erro ao buscar resultado: {str(e)}")
-
+            
 # Inicialização do BOT
 async def main():
     token = await get_discord_token_from_db()
