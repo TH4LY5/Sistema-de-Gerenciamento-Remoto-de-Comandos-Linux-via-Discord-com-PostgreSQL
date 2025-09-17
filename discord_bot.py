@@ -6,6 +6,8 @@ import asyncpg
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
+from security import CommandSecurity
+
 load_dotenv()
 
 SERVER_URL = db_url = os.getenv("SERVER_URL")
@@ -125,29 +127,48 @@ async def on_message(message):
         except Exception as e:
             await message.channel.send(f"Erro ao listar máquinas: {str(e)}")
 
+
     elif message.content.lower().startswith("!register_script"):
         parts = message.content.split(maxsplit=2)
         if len(parts) < 3:
             await message.channel.send("Uso: !register_script <nome> <conteúdo>")
             return
+
         name, content = parts[1], parts[2]
+
+        # Verificar se o script é perigoso antes de enviar para a API
+        if CommandSecurity.is_dangerous(content):
+            await message.channel.send(f"❌ Script '{name}' contém comandos perigosos e não pode ser registrado!")
+            return
+
         try:
             await make_post_request("scripts", {"name": name, "content": content})
             await message.channel.send(f"✅ Script '{name}' registrado com sucesso!")
         except Exception as e:
             await message.channel.send(f"Erro ao registrar script: {str(e)}")
 
-    elif message.content.lower().startswith("!execute_script"):
-        parts = message.content.split()
+
+    elif message.content.lower().startswith("!register_script"):
+        parts = message.content.split(maxsplit=2)
         if len(parts) < 3:
-            await message.channel.send("Uso: !execute_script <nome_máquina> <nome_script>")
+            await message.channel.send("Uso: !register_script <nome> <conteúdo>")
             return
-        machine_name, script_name = parts[1], parts[2]
+
+        name, content = parts[1], parts[2]
+
+        # Verificar se o script é perigoso antes de enviar para a API
+        if CommandSecurity.is_dangerous(content):
+            # Log da tentativa de comando perigoso
+            print(f"TENTATIVA DE COMANDO PERIGOSO: {message.author} tentou registrar: {content}")
+            await message.channel.send(f"❌ Script '{name}' contém comandos perigosos e não pode ser registrado!")
+            return
+
         try:
-            await make_post_request("execute", {"machine_name": machine_name, "script_name": script_name})
-            await message.channel.send(f"✅ Script '{script_name}' agendado para execução em {machine_name}!")
+            await make_post_request("scripts", {"name": name, "content": content})
+            await message.channel.send(f"✅ Script '{name}' registrado com sucesso!")
+
         except Exception as e:
-            await message.channel.send(f"Erro ao executar script: {str(e)}")
+            await message.channel.send(f"Erro ao registrar script: {str(e)}")
 
     elif message.content.lower().startswith("!command_result"):
         parts = message.content.split()
