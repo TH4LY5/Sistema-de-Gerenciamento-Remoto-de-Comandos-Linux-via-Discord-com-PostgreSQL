@@ -155,6 +155,27 @@ async def on_message(message):
             logger.error(f"Erro ao registrar script '{name}': {e}")
             await message.channel.send(f"Erro ao registrar script: {str(e)}")
 
+
+    elif message.content.lower().startswith("!execute_script"):
+       
+        parts = message.content.split()
+        
+        if len(parts) < 3:
+            await message.channel.send("Uso: !execute_script <nome_máquina> <nome_script>")
+            logging.warning(f"Comando !execute_script usado incorretamente por {message.author}")
+            return
+        machine_name, script_name = parts[1], parts[2]
+
+        try:
+            logging.info(f"Agendando script '{script_name}' para execução na máquina '{machine_name}' solicitado por {message.author}")
+            await make_post_request("execute", {"machine_name": machine_name, "script_name": script_name})
+            await message.channel.send(f"✅ Script '{script_name}' agendado para execução em {machine_name}!")
+            logging.info(f"Script '{script_name}' agendado com sucesso para {machine_name}")
+
+        except Exception as e:
+            await message.channel.send(f"Erro ao executar script: {str(e)}")
+            logging.error(f"Falha ao agendar script '{script_name}' para {machine_name}: {e}")
+
     elif message.content.lower().startswith("!command_result"):
         logger.info(f"Comando !command_result solicitado por {message.author}")
         parts = message.content.split()
