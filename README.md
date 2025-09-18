@@ -91,7 +91,7 @@ Retorna o resultado do último comando executado em uma máquina.
 
 ### Instalação do Agente Linux
 
-Para instalar o agente em uma máquina Linux (Ubuntu 22.04):
+Para instalar o agente em uma máquina Linux:
 
 #### 1. Instalar Dependências
 
