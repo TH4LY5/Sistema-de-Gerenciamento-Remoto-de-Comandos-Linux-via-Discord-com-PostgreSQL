@@ -21,7 +21,7 @@ logger = logging.getLogger("discord_bot")
 load_dotenv()
 
 SERVER_URL = os.getenv("SERVER_URL")
-AUTHORIZED_USERS = [410731828618592256, 694217161752969327, 703340009259925624]
+AUTHORIZED_USERS = [410731828618592256, 694217161752969327, 703340009259925624, 1342277332332843130]
 
 intents = discord.Intents.default()
 intents.message_content = True
