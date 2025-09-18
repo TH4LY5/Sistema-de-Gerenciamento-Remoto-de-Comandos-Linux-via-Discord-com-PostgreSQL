@@ -151,3 +151,8 @@ sudo journalctl -u agent -f
 ## Contato
 
 *   **Autor**: TH4LY5
+## Testes Locais da API (Insomnia)
+
+A pasta `Collection/` contém um arquivo de coleção da API que pode ser importado no Insomnia (ou ferramenta similar) para facilitar os testes locais dos endpoints da API.
+
+
